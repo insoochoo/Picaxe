@@ -1,0 +1,179 @@
+symbol leftsen = C.0
+symbol rightsen = C.1
+symbol leftsen2 = B.5
+symbol rightsen2 = B.7
+
+symbol rightmotor1 = 0
+symbol rightmotor2 = 1
+symbol leftmotor1 = 2
+symbol leftmotor2 = 3
+symbol hi = b13
+symbol helper = b12
+symbol sharpR = b11
+symbol sharpL = b10
+hi = 0
+helper = 0
+sharpR = 0
+sharpL = 0
+
+main:
+readadc leftsen2, b2
+readadc rightsen2, b3
+readadc rightsen,b0 
+readadc leftsen,b1
+
+	if b2 > 210 and b3 > 210 then
+		goto turnaround
+	elseif b0 < 210 and b1>210 and sharpL = 0 then
+		goto turnleft
+	elseif b0 < 210 and b1>210 and sharpL = 1 then
+		goto turnsharpleft
+	elseif b1 < 210 and b0>210 and sharpR = 0 then
+		goto turnright
+	elseif b1 < 210 and b0>210 and sharpR = 1 then
+		goto turnsharpright
+	elseif b2 > 210 then
+		sharpL = 1
+	elseif  b3 > 210 then
+		sharpR = 1
+	else
+		goto drive
+	endif
+
+goto main
+
+drive:
+high rightmotor2
+low rightmotor1
+high leftmotor2
+low leftmotor1
+
+if hi = 0 then
+	pause 400
+	hi= hi+1
+end if
+
+goto main
+
+
+turnleft:
+low rightmotor2
+low rightmotor1
+high leftmotor2
+low leftmotor1
+
+readadc rightsen,b0
+readadc leftsen,b1
+readadc leftsen2, b2
+readadc rightsen2, b3
+	
+	
+	if b0 > 210 and b1 > 210 then
+		goto turnaround
+	elseif b1>210 then
+		goto turnleft
+	endif
+
+goto main
+
+turnsharpleft:
+
+if helper = 0 then
+	high rightmotor2
+	low rightmotor1
+	high leftmotor2
+	low leftmotor1
+	pause 300
+	helper = helper + 1
+end if
+
+low rightmotor2
+high rightmotor1
+high leftmotor2
+low leftmotor1
+rem pause 30
+readadc leftsen,b1
+
+if b1 < 210 then
+	goto turnsharpleft
+end if
+
+helper = 0
+sharpL = 0
+sharpR = 0
+goto main
+
+
+turnright:
+high rightmotor2
+low rightmotor1
+low leftmotor2
+low leftmotor1
+
+readadc rightsen,b0
+readadc leftsen,b1
+readadc leftsen2, b2
+readadc rightsen2, b3
+	
+	
+	if b0 > 210 and b1 > 210 then
+		goto turnaround
+
+	elseif b0>210 then
+		goto turnright
+	endif
+
+goto main
+
+turnsharpright:
+
+if helper = 0 then
+	high rightmotor2
+	low rightmotor1
+	high leftmotor2
+	low leftmotor1
+	pause 300
+	helper = helper + 1
+end if
+
+high rightmotor2
+low rightmotor1
+low leftmotor2
+high leftmotor1
+rem pause 30
+
+readadc rightsen,b0
+
+if b0 < 210 then
+	goto turnsharpright
+end if
+
+helper = 0
+sharpR = 0
+sharpL = 0
+goto main
+
+turnaround:
+
+low rightmotor2
+low rightmotor1
+low leftmotor2
+high leftmotor1
+
+if helper = 0 then
+pause 300
+helper = helper + 1
+end if
+
+readadc rightsen,b0
+
+if b0 < 210 then
+	goto turnaround
+end if
+
+helper = 0
+sharpR = 0
+sharpL = 0
+goto turnright
+
+
